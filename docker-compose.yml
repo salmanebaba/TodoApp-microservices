@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:latest
+    container_name: todoapp-mongodb
+    restart: always
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - todoapp-network
+    command: mongod --replSet rs0 --bind_ip_all --noauth
+    healthcheck:
+      test: echo 'db.adminCommand("ping")' | mongosh localhost/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MongoDB Replica Set Initializer
+  mongodb-init:
+    image: mongo:latest
+    container_name: todoapp-mongodb-init
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - todoapp-network
+    entrypoint: bash
+    command: >
+      -c "
+      mongosh --host mongodb:27017 --eval 'rs.initiate({_id: \"rs0\", members: [{_id: 0, host: \"mongodb:27017\"}]})' || true;
+      mongosh --host mongodb:27017 --eval 'db.createUser({user: \"admin\", pwd: \"admin123\", roles: [\"root\"]})' || true;
+      mongosh --host mongodb:27017/todoapp --eval 'db.createCollection(\"users\")' || true
+      "
+    restart: on-failure
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: todoapp-auth-service
+    restart: always
+    ports:
+      - '4000:4000'
+    environment:
+      DATABASE_URL: mongodb://mongodb:27017/todoapp?replicaSet=rs0
+      JWT_SECRET: super-secret-key-min-32-characters-long-for-security
+      JWT_REFRESH_SECRET: super-refresh-secret-key-min-32-characters-long
+      JWT_EXPIRES_IN: 1h
+      JWT_REFRESH_EXPIRES_IN: 7d
+      BCRYPT_ROUNDS: 10
+      REST_PORT: 4000
+      FRONTEND_URL: http://localhost:3000
+      NODE_ENV: development
+    depends_on:
+      mongodb-init:
+        condition: service_completed_successfully
+    networks:
+      - todoapp-network
+    healthcheck:
+      test: wget --quiet --tries=1 --spider http://localhost:4000/auth/profile || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Todo Service
+  todo-service:
+    build:
+      context: ./todo-service
+      dockerfile: Dockerfile
+    container_name: todoapp-todo-service
+    restart: always
+    ports:
+      - '4001:4001'
+    environment:
+      DATABASE_URL: mongodb://mongodb:27017/todoapp?replicaSet=rs0
+      JWT_SECRET: super-secret-key-min-32-characters-long-for-security
+      REST_PORT: 4001
+      FRONTEND_URL: http://localhost:3000
+      NODE_ENV: development
+    depends_on:
+      mongodb-init:
+        condition: service_completed_successfully
+    networks:
+      - todoapp-network
+    healthcheck:
+      test: wget --quiet --tries=1 --spider http://localhost:4001/todos || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Frontend
+  todoapp-frontend:
+    build:
+      context: ./todoapp-frontend
+      dockerfile: Dockerfile
+    container_name: todoapp-frontend
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      NEXT_PUBLIC_AUTH_API: http://localhost:4000
+      NEXT_PUBLIC_TODO_API: http://localhost:4001
+    depends_on:
+      - auth-service
+      - todo-service
+    networks:
+      - todoapp-network
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+
+networks:
+  todoapp-network:
+    driver: bridge
