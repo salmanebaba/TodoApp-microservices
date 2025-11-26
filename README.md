@@ -1,6 +1,6 @@
 # TodoApp Microservices
 
-A modern Todo application built with **microservices architecture**, following the design patterns from the **platform-orchestration** project.
+A modern Todo application built with **microservices architecture**.
 
 ## 🚀 Quick Start
 
@@ -29,16 +29,16 @@ After starting, create an account via the registration page or use:
 
 ## 📋 Project Overview
 
-This project demonstrates a **production-ready microservices architecture** inspired by the platform-orchestration project:
+This project demonstrates a **production-ready microservices architecture** .
 
 ### Services
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| **Frontend** | 3000 | Next.js React app |
-| **Auth Service** | 4000 | Authentication & JWT |
-| **Todo Service** | 4001 | Todo CRUD operations |
-| **MongoDB** | 27017 | Database |
+| Service          | Port  | Purpose              |
+|------------------|-------|----------------------|
+| **Frontend**     | 3000  | Next.js React app    |
+| **Auth Service** | 4000  | Authentication & JWT |
+| **Todo Service** | 4001  | Todo CRUD operations |
+| **MongoDB**      | 27017 | Database             |
 
 ### Key Features
 
@@ -156,80 +156,6 @@ todoapp-microservices/
 
 ---
 
-## 📚 API Documentation
-
-### Auth Service (Port 4000)
-
-```bash
-# Register
-POST /auth/register
-{
-  "email": "user@example.com",
-  "password": "Password123",
-  "firstName": "John",
-  "lastName": "Doe"
-}
-
-# Login
-POST /auth/login
-{
-  "email": "user@example.com",
-  "password": "Password123"
-}
-
-# Get Profile
-GET /auth/profile
-Authorization: Bearer <token>
-
-# Refresh Token
-POST /auth/refresh
-{
-  "refreshToken": "<refresh_token>"
-}
-
-# Logout
-POST /auth/logout
-Authorization: Bearer <token>
-```
-
-### Todo Service (Port 4001)
-
-```bash
-# Get All Todos (current user)
-GET /todos
-Authorization: Bearer <token>
-
-# Create Todo
-POST /todos
-Authorization: Bearer <token>
-{
-  "title": "Buy groceries",
-  "description": "Milk, eggs, bread"
-}
-
-# Update Todo
-PATCH /todos/:id
-Authorization: Bearer <token>
-{
-  "title": "Updated title",
-  "completed": true
-}
-
-# Delete Todo
-DELETE /todos/:id
-Authorization: Bearer <token>
-
-# Admin: Get All Todos
-GET /todos/admin/all
-Authorization: Bearer <admin_token>
-
-# Admin: Delete Any Todo
-DELETE /todos/admin/:id
-Authorization: Bearer <admin_token>
-```
-
----
-
 ## 🚀 Deployment
 
 ### Docker Compose (Development)
@@ -250,88 +176,6 @@ JWT_SECRET=<very-secure-random-string>
 JWT_REFRESH_SECRET=<another-secure-random-string>
 DATABASE_URL=mongodb://user:pass@prod-host/todoapp
 ```
-
----
-
-## 🔧 Development
-
-### Local Development without Docker
-
-#### 1. Start MongoDB
-```bash
-mongod --dbpath ./data
-```
-
-#### 2. Auth Service
-```bash
-cd auth-service
-npm install
-npm run start:dev
-# Runs on http://localhost:4000
-```
-
-#### 3. Todo Service (new terminal)
-```bash
-cd todo-service
-npm install
-npm run start:dev
-# Runs on http://localhost:4001
-```
-
-#### 4. Frontend (new terminal)
-```bash
-cd todoapp-frontend
-npm install
-npm run dev
-# Runs on http://localhost:3000
-```
-
----
-
-## 🧪 Testing
-
-### Auth Service
-```bash
-cd auth-service
-npm test
-npm run test:cov
-```
-
-### Todo Service
-```bash
-cd todo-service
-npm test
-npm run test:cov
-```
-
-### Frontend
-```bash
-cd todoapp-frontend
-npm test
-npm run test:watch
-```
-
----
-
-## 📦 Build & Deploy
-
-### Build Services
-```bash
-# Build all services
-docker-compose build
-
-# Build specific service
-docker build -t auth-service ./auth-service
-docker build -t todo-service ./todo-service
-docker build -t todoapp-frontend ./todoapp-frontend
-```
-
-### Push to Registry
-```bash
-docker tag auth-service yourregistry/auth-service:1.0
-docker push yourregistry/auth-service:1.0
-```
-
 ---
 
 ## 🔒 Security Best Practices Implemented
@@ -347,43 +191,8 @@ docker push yourregistry/auth-service:1.0
 
 ---
 
-## 🚨 Troubleshooting
-
-### MongoDB Connection Refused
-```bash
-# Ensure MongoDB is running
-docker-compose ps
-
-# Restart MongoDB
-docker-compose restart mongodb
-```
-
-### API Connection Errors
-```bash
-# Check service logs
-docker-compose logs auth-service
-docker-compose logs todo-service
-
-# Verify environment variables
-docker-compose exec auth-service env | grep DATABASE_URL
-```
-
-### Token Expired Errors
-```bash
-# Clear browser localStorage
-# Login again to get fresh tokens
-# Check JWT_SECRET matches across services
-```
-
-### CORS Errors
-```bash
-# Update FRONTEND_URL in .env
-# Restart services
-docker-compose restart
-```
 
 ---
-
 ## 📊 Monitoring & Debugging
 
 ### View Logs
@@ -432,68 +241,3 @@ npx prisma studio
 - Indexed database queries
 - Request caching with Redis (future)
 - Rate limiting with helmet (future)
-
----
-
-## 🎯 Future Enhancements
-
-- [ ] gRPC communication between services
-- [ ] Redis caching layer
-- [ ] Message queue (RabbitMQ)
-- [ ] Distributed tracing
-- [ ] API rate limiting
-- [ ] GraphQL endpoint
-- [ ] Real-time updates (WebSocket)
-- [ ] Advanced search & filtering
-- [ ] Todo sharing/collaboration
-- [ ] Attachments support
-- [ ] Recurring todos
-- [ ] Email notifications
-- [ ] Dark mode
-- [ ] Mobile app (React Native)
-
----
-
-## 📚 Learning Resources
-
-- [NestJS Documentation](https://docs.nestjs.com)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [MongoDB Documentation](https://docs.mongodb.com)
-- [JWT.io](https://jwt.io)
-- [TailwindCSS](https://tailwindcss.com/docs)
-
----
-
-## 📄 License
-
-UNLICENSED
-
----
-
-## 👥 Support
-
-For issues or questions:
-1. Check the individual service READMEs
-2. Review ARCHITECTURE_ANALYSIS.md
-3. Check Docker logs: `docker-compose logs`
-4. Verify environment variables in `.env`
-
----
-
-## ✨ Key Files
-
-| File | Purpose |
-|------|---------|
-| `docker-compose.yml` | Service orchestration |
-| `.env` | Environment configuration |
-| `ARCHITECTURE_ANALYSIS.md` | Detailed architecture docs |
-| `auth-service/prisma/schema.prisma` | Database schema |
-| `auth-service/src/modules/auth/auth.service.ts` | Auth logic |
-| `todo-service/src/modules/todo/todo.controller.ts` | Todo API |
-| `todoapp-frontend/src/hooks/useAuth.ts` | Frontend auth hook |
-| `todoapp-frontend/src/hooks/useTodos.ts` | Frontend todo hook |
-
----
-
-Happy coding! 🎉
