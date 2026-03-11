@@ -18,7 +18,7 @@ build_services:
   script:
     - cd $SERVICE_DIR
     - echo "Installing dependencies for $SERVICE_DIR..."
-    - npm i
+    - npm i --legacy-peer-deps
     - echo "Running production build for $SERVICE_DIR..."
     - npm run build
     - echo "$SERVICE_DIR built successfully!"
